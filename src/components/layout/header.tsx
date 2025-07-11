@@ -45,6 +45,9 @@ export function Header() {
             <Link href="/shopping" className="text-sm font-medium hover:text-primary transition-colors">
               Shopping
             </Link>
+            <Link href="/crop-match" className="text-sm font-medium hover:text-primary transition-colors">
+              Crop Match
+            </Link>
           </nav>
         </div>
 
