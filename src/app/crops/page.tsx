@@ -13,14 +13,14 @@ import Link from "next/link"
 
 export default function CropsPage() {
   const { crops, loading, harvestCrop, readyCrops, growingCrops } = useCrops()
-  const [harvestingCropId, setHarvestingCropId] = useState<string | null>(null)
+  const [harvestingCropId, setHarvestingCropId] = useState<string | undefined>(undefined)
   const [harvestedCrop, setHarvestedCrop] = useState<Crop | null>(null)
   const [showHarvestWidget, setShowHarvestWidget] = useState(false)
 
   const handleHarvest = async (cropId: string) => {
     setHarvestingCropId(cropId)
     try {
-      const harvestEvent = await harvestCrop(cropId)
+      await harvestCrop(cropId)
       const crop = crops.find((c) => c.id === cropId)
       if (crop) {
         setHarvestedCrop(crop)
@@ -29,7 +29,7 @@ export default function CropsPage() {
     } catch (error) {
       console.error("Harvest failed:", error)
     } finally {
-      setHarvestingCropId(null)
+      setHarvestingCropId(undefined)
     }
   }
 

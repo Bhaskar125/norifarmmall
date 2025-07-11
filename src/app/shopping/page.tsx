@@ -25,7 +25,7 @@ export default function ShoppingPage() {
   useEffect(() => {
     // Load initial products
     searchProducts("")
-  }, [])
+  }, [searchProducts])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()

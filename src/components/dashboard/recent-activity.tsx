@@ -11,7 +11,7 @@ interface Activity {
   title: string
   description: string
   timestamp: Date
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 const mockActivities: Activity[] = [

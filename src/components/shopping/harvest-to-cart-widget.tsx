@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import type { Product, Crop } from "@/types"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -23,20 +23,20 @@ export function HarvestToCartWidget({ harvestedCrop, onClose, isVisible }: Harve
   const { addToCart, totalItems } = useShoppingCart()
   const [addingToCart, setAddingToCart] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (isVisible && harvestedCrop) {
-      loadRecommendations()
-    }
-  }, [isVisible, harvestedCrop])
-
-  const loadRecommendations = async () => {
+  const loadRecommendations = useCallback(async () => {
     try {
       const result = await getRecommendationsForCrop(harvestedCrop.type)
       setRecommendations(result.products)
     } catch (error) {
       console.error("Failed to load recommendations:", error)
     }
-  }
+  }, [getRecommendationsForCrop, harvestedCrop.type])
+
+  useEffect(() => {
+    if (isVisible && harvestedCrop) {
+      loadRecommendations()
+    }
+  }, [isVisible, harvestedCrop, loadRecommendations])
 
   const handleAddToCart = async (product: Product) => {
     setAddingToCart(product.id)
