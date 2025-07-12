@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CropGrid } from "@/components/crops/crop-grid"
+import { CropCard } from "@/components/crops/crop-card"
 import { UserStats } from "@/components/dashboard/user-state"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { HarvestToCartWidget } from "@/components/shopping/harvest-to-cart-widget"
@@ -56,7 +57,7 @@ export default function Dashboard() {
     setShowEditModal(true)
   }
 
-  const handleEditSave = async (cropData: any) => {
+  const handleEditSave = async (cropData: Crop) => {
     try {
       await editCrop(cropData)
       setShowEditModal(false)
@@ -180,12 +181,17 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             {growingCrops.length > 0 ? (
-              <CropGrid
-                crops={growingCrops.slice(0, 2)}
-                onViewDetails={handleViewDetails}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
+              <div className="grid grid-cols-1 gap-4">
+                {growingCrops.slice(0, 2).map((crop) => (
+                  <CropCard
+                    key={crop.id}
+                    crop={crop}
+                    onViewDetails={handleViewDetails}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">
                 <p>No crops currently growing</p>

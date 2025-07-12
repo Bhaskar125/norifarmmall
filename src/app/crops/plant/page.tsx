@@ -163,8 +163,8 @@ export default function PlantCropPage() {
     if (formData.expectedYield < 1 || formData.expectedYield > 100) {
       newErrors.expectedYield = "Expected yield must be between 1 and 100"
     }
-    if (formData.growthDuration < 1 || formData.growthDuration > 365) {
-      newErrors.growthDuration = "Growth duration must be between 1 and 365 days"
+    if (formData.growthDuration < 1 || formData.growthDuration > 1500) {
+      newErrors.growthDuration = "Growth duration must be between 1 and 1500 days"
     }
 
     setErrors(newErrors)
@@ -308,12 +308,12 @@ export default function PlantCropPage() {
                 id="duration"
                 type="number"
                 min="1"
-                max="365"
+                max="1500"
                 value={formData.growthDuration}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange("growthDuration", parseInt(e.target.value) || 0)}
                 className={errors.growthDuration ? "border-red-500" : ""}
               />
-              <p className="text-sm text-muted-foreground">Days until harvest (1-365)</p>
+              <p className="text-sm text-muted-foreground">Days until harvest (1-1500 days, ~4 years)</p>
               {errors.growthDuration && (
                 <p className="text-sm text-red-600">{errors.growthDuration}</p>
               )}
