@@ -1,34 +1,36 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import type { Product, ShoppingRecommendation } from "@/types"
 import { mockProducts } from "@/lib/mockData"
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(false)
 
-  const searchProducts = async (query: string, category?: string): Promise<Product[]> => {
-    setLoading(true)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 800))
-
+  const searchProducts = useCallback((query: string, category?: string): Product[] => {
     let filtered = mockProducts
-    if (query) {
+    
+    // Filter by search query
+    if (query && query.trim()) {
+      const searchTerm = query.toLowerCase().trim()
       filtered = filtered.filter(
         (p) =>
-          p.name.toLowerCase().includes(query.toLowerCase()) ||
-          p.description.toLowerCase().includes(query.toLowerCase()),
+          p.name.toLowerCase().includes(searchTerm) ||
+          p.description.toLowerCase().includes(searchTerm) ||
+          p.brand.toLowerCase().includes(searchTerm) ||
+          p.category.toLowerCase().includes(searchTerm)
       )
     }
-    if (category) {
-      filtered = filtered.filter((p) => p.category.toLowerCase() === category.toLowerCase())
+    
+    // Filter by category
+    if (category && category.trim()) {
+      const categoryFilter = category.trim()
+      filtered = filtered.filter((p) => p.category === categoryFilter)
     }
 
     setProducts(filtered)
-    setLoading(false)
     return filtered
-  }
+  }, [])
 
   const getRecommendationsForCrop = async (cropType: string): Promise<ShoppingRecommendation> => {
     // Simulate API call for recommendations
@@ -46,7 +48,6 @@ export function useProducts() {
 
   return {
     products,
-    loading,
     searchProducts,
     getRecommendationsForCrop,
   }

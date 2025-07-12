@@ -13,5 +13,19 @@
     "nftTokenId": "NFT395",
     "maturityLevel": 0.00650441400304414,
     "isReady": false
+  },
+  {
+    "id": "crop_1752343526101",
+    "name": "Jackfruit",
+    "type": "fruit",
+    "description": "The jackfruit or nangka is a species of tree in the fig, mulberry, and breadfruit family. The jackfruit is the largest tree fruit, reaching as much as 55 kg in weight, 90 cm in length, and 50 cm in diameter. A mature jackfruit tree produces some 200 fruits per year, with older trees bearing up to 500 fruits in a year.",
+    "expectedYield": 5,
+    "rarity": "legendary",
+    "imageUrl": "/uploads/crop_1752343524207_images.webp",
+    "plantedAt": "2025-07-12T18:05:26.101Z",
+    "harvestAt": "2026-07-12T18:05:26.101Z",
+    "maturityLevel": 0,
+    "isReady": false,
+    "nftTokenId": "NFT267"
   }
 ]
