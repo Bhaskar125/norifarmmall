@@ -8,6 +8,7 @@ import { CropGrid } from "@/components/crops/crop-grid"
 import { UserStats } from "@/components/dashboard/user-state"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { HarvestToCartWidget } from "@/components/shopping/harvest-to-cart-widget"
+import { EditCropModal } from "@/components/crops/edit-crop-modal"
 import { useCrops } from "@/hooks/useCrops"
 import type { Crop, UserStats as UserStatsType } from "@/types"
 import { Sprout, Trophy, TrendingUp, Plus } from "lucide-react"
@@ -23,10 +24,12 @@ const mockUserStats: UserStatsType = {
 }
 
 export default function Dashboard() {
-  const { crops, harvestCrop, readyCrops, growingCrops } = useCrops()
+  const { crops, harvestCrop, editCrop, deleteCrop, readyCrops, growingCrops } = useCrops()
   const [harvestingCropId, setHarvestingCropId] = useState<string | undefined>(undefined)
   const [harvestedCrop, setHarvestedCrop] = useState<Crop | null>(null)
   const [showHarvestWidget, setShowHarvestWidget] = useState(false)
+  const [editingCrop, setEditingCrop] = useState<Crop | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   const handleHarvest = async (cropId: string) => {
     setHarvestingCropId(cropId)
@@ -46,6 +49,36 @@ export default function Dashboard() {
 
   const handleViewDetails = (cropId: string) => {
     window.location.href = `/crops/${cropId}`
+  }
+
+  const handleEdit = (crop: Crop) => {
+    setEditingCrop(crop)
+    setShowEditModal(true)
+  }
+
+  const handleEditSave = async (cropData: any) => {
+    try {
+      await editCrop(cropData)
+      setShowEditModal(false)
+      setEditingCrop(null)
+    } catch (error) {
+      console.error("Edit failed:", error)
+      throw error
+    }
+  }
+
+  const handleDelete = async (cropId: string) => {
+    const crop = crops.find(c => c.id === cropId)
+    if (!crop) return
+    
+    if (confirm(`Are you sure you want to delete "${crop.name}"? This action cannot be undone.`)) {
+      try {
+        await deleteCrop(cropId)
+      } catch (error) {
+        console.error("Delete failed:", error)
+        alert("Failed to delete crop. Please try again.")
+      }
+    }
   }
 
   return (
@@ -126,6 +159,8 @@ export default function Dashboard() {
               crops={readyCrops}
               onHarvest={handleHarvest}
               onViewDetails={handleViewDetails}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
               harvestingCropId={harvestingCropId}
             />
           </CardContent>
@@ -148,6 +183,8 @@ export default function Dashboard() {
               <CropGrid
                 crops={growingCrops.slice(0, 2)}
                 onViewDetails={handleViewDetails}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             ) : (
               <div className="text-center py-8 text-muted-foreground">
@@ -170,6 +207,20 @@ export default function Dashboard() {
             setShowHarvestWidget(false)
             setHarvestedCrop(null)
           }}
+        />
+      )}
+
+      {/* Edit Crop Modal */}
+      {editingCrop && (
+        <EditCropModal
+          crop={editingCrop}
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false)
+            setEditingCrop(null)
+          }}
+          onSave={handleEditSave}
+          onDelete={handleDelete}
         />
       )}
     </div>

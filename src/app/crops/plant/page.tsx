@@ -30,6 +30,15 @@ interface PlantCropForm {
   growthDuration: number // in days
 }
 
+interface ImageUploadResult {
+  success: boolean
+  imageUrl: string
+  filename: string
+  originalName: string
+  size: number
+  type: string
+}
+
 const cropTypeOptions = [
   { value: "vegetable", label: "Vegetable 🥕", description: "Root vegetables, leafy greens, etc." },
   { value: "fruit", label: "Fruit 🍎", description: "Tree fruits, berries, citrus" },
@@ -61,11 +70,14 @@ export default function PlantCropPage() {
     description: "",
     expectedYield: 5,
     rarity: "",
-    imageUrl: "",
+    imageUrl: "https://images.unsplash.com/photo-1592841200221-a6898f307baa?w=400&h=400&fit=crop",
     growthDuration: 75,
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<string>("")
 
   const handleInputChange = (field: keyof PlantCropForm, value: string | number) => {
     setFormData(prev => ({
@@ -89,6 +101,47 @@ export default function PlantCropPage() {
         ...prev,
         growthDuration: duration
       }))
+    }
+  }
+
+  const handleImageUpload = async (file: File) => {
+    if (!file) return
+
+    setIsUploading(true)
+    setUploadProgress("Uploading image...")
+
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const result: ImageUploadResult = await response.json()
+
+      if (result.success) {
+        setFormData(prev => ({
+          ...prev,
+          imageUrl: result.imageUrl
+        }))
+        setUploadProgress(`✅ Uploaded: ${result.originalName}`)
+      } else {
+        setUploadProgress(`❌ Upload failed: Unknown error`)
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      setUploadProgress("❌ Upload failed. Please try again.")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleImageUpload(file)
     }
   }
 
@@ -290,18 +343,83 @@ export default function PlantCropPage() {
             )}
           </div>
 
-          {/* Image URL */}
+          {/* Image Upload */}
           <div className="space-y-2">
-            <Label htmlFor="imageUrl">Image URL (Optional)</Label>
-            <Input
-              id="imageUrl"
-              placeholder="https://example.com/crop-image.jpg"
-              value={formData.imageUrl}
-              onChange={(e) => handleInputChange("imageUrl", e.target.value)}
-            />
-            <p className="text-sm text-muted-foreground">
-              Leave empty to use default placeholder image
-            </p>
+            <Label htmlFor="imageUrl">Crop Image</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
+                {/* File Upload */}
+                <div className="space-y-2">
+                  <Label htmlFor="imageUpload">Upload Image</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="imageUpload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      disabled={isUploading}
+                      className="cursor-pointer"
+                    />
+                    {isUploading && (
+                      <div className="text-sm text-blue-600">Uploading...</div>
+                    )}
+                  </div>
+                  {uploadProgress && (
+                    <p className="text-sm text-muted-foreground">{uploadProgress}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground">
+                    Max 5MB • JPG, PNG, WebP supported
+                  </p>
+                </div>
+                
+                {/* Or URL Input */}
+                <div className="space-y-2">
+                  <Label htmlFor="imageUrl">Or Enter Image URL</Label>
+                  <Input
+                    id="imageUrl"
+                    placeholder="https://images.unsplash.com/photo-..."
+                    value={formData.imageUrl}
+                    onChange={(e) => handleInputChange("imageUrl", e.target.value)}
+                    disabled={isUploading}
+                  />
+                  <details className="cursor-pointer">
+                    <summary className="text-blue-600 hover:text-blue-800 text-sm">🖼️ Get free crop images</summary>
+                    <div className="mt-2 space-y-1 text-xs bg-gray-50 p-3 rounded">
+                      <p><strong>📸 Free Image Sources:</strong></p>
+                      <p>• <a href="https://unsplash.com/s/photos/vegetables" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Unsplash - Vegetables</a></p>
+                      <p>• <a href="https://unsplash.com/s/photos/fruits" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Unsplash - Fruits</a></p>
+                      <p>• <a href="https://unsplash.com/s/photos/herbs" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Unsplash - Herbs</a></p>
+                      <p>• <a href="https://unsplash.com/s/photos/grains" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Unsplash - Grains</a></p>
+                      <p className="mt-2 text-green-600">💡 Right-click → Copy image address!</p>
+                    </div>
+                  </details>
+                </div>
+              </div>
+              
+              {/* Image Preview */}
+              <div className="space-y-2">
+                <Label>Preview</Label>
+                <div className="relative aspect-square bg-muted rounded-lg overflow-hidden border-2 border-dashed border-gray-200">
+                  {formData.imageUrl ? (
+                    <img 
+                      src={formData.imageUrl} 
+                      alt="Crop preview" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg?height=200&width=200"
+                      }}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">🌱</div>
+                        <p className="text-sm">Image preview</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           <Separator />

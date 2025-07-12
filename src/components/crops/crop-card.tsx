@@ -5,18 +5,25 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { Calendar, Sparkles, Zap } from "lucide-react"
+import { Calendar, Sparkles, Zap, Edit, Trash2, MoreVertical } from "lucide-react"
 import { formatDate, getRarityColor, getMaturityColor } from "@/lib/utils"
-import Image from "next/image"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface CropCardProps {
   crop: Crop
   onHarvest?: (cropId: string) => void
   onViewDetails?: (cropId: string) => void
+  onEdit?: (crop: Crop) => void
+  onDelete?: (cropId: string) => void
   isHarvesting?: boolean
 }
 
-export function CropCard({ crop, onHarvest, onViewDetails, isHarvesting }: CropCardProps) {
+export function CropCard({ crop, onHarvest, onViewDetails, onEdit, onDelete, isHarvesting }: CropCardProps) {
   const maturityColor = getMaturityColor(crop.maturityLevel)
   const rarityColor = getRarityColor(crop.rarity)
 
@@ -31,17 +38,45 @@ export function CropCard({ crop, onHarvest, onViewDetails, isHarvesting }: CropC
               {crop.rarity}
             </Badge>
           </div>
-          {crop.nftTokenId && (
-            <Badge variant="secondary" className="text-xs">
-              #{crop.nftTokenId}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {crop.nftTokenId && (
+              <Badge variant="secondary" className="text-xs">
+                #{crop.nftTokenId}
+              </Badge>
+            )}
+            {(onEdit || onDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {onEdit && (
+                    <DropdownMenuItem onClick={() => onEdit(crop)}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {onDelete && (
+                    <DropdownMenuItem 
+                      onClick={() => onDelete(crop.id)}
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
-          <Image src={crop.imageUrl || "/placeholder.svg"} alt={crop.name} fill className="object-cover" />
+          <img src={crop.imageUrl || "/placeholder.svg"} alt={crop.name} className="w-full h-full object-cover" />
           {crop.isReady && (
             <div className="absolute top-2 right-2">
               <Badge className="bg-green-500 hover:bg-green-600">

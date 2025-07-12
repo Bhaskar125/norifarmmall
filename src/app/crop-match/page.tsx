@@ -48,9 +48,9 @@ export default function CropMatchPage() {
     setResult(null)
 
     try {
-      // Use client-side matching to include newly planted crops from localStorage
+      // Use client-side matching to include newly planted crops from JSON file
       const { matchCropToProduct } = await import('@/lib/cropMatcher')
-      const data = matchCropToProduct(query.trim())
+      const data = await matchCropToProduct(query.trim())
       
       if (!data) {
         setError(`No crop found for query: ${query.trim()}`)
@@ -99,7 +99,7 @@ export default function CropMatchPage() {
             Search for Crop
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            🌱 Includes newly planted crops from your virtual farm!
+            🌱 Includes newly planted crops from your virtual farm (stored in JSON file)!
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -284,7 +284,7 @@ export default function CropMatchPage() {
           <div className="bg-gray-50 p-4 rounded-lg">
             <h4 className="font-semibold mb-2">💡 Pro Tips:</h4>
             <ul className="text-sm space-y-1 text-muted-foreground">
-              <li>• Newly planted crops are automatically stored and persist across page reloads</li>
+              <li>• Newly planted crops are automatically stored in JSON file and persist across sessions</li>
               <li>• Try planting &ldquo;Tomato&rdquo; or &ldquo;Basil&rdquo; to match with existing Korean products</li>
               <li>• NFT token IDs are auto-generated for crop identification</li>
               <li>• The crop-to-product matching works for both names and NFT IDs</li>

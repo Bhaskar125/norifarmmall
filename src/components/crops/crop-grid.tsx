@@ -9,10 +9,12 @@ interface CropGridProps {
   loading?: boolean
   onHarvest?: (cropId: string) => void
   onViewDetails?: (cropId: string) => void
+  onEdit?: (crop: Crop) => void
+  onDelete?: (cropId: string) => void
   harvestingCropId?: string
 }
 
-export function CropGrid({ crops, loading, onHarvest, onViewDetails, harvestingCropId }: CropGridProps) {
+export function CropGrid({ crops, loading, onHarvest, onViewDetails, onEdit, onDelete, harvestingCropId }: CropGridProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -40,6 +42,8 @@ export function CropGrid({ crops, loading, onHarvest, onViewDetails, harvestingC
           crop={crop}
           onHarvest={onHarvest}
           onViewDetails={onViewDetails}
+          onEdit={onEdit}
+          onDelete={onDelete}
           isHarvesting={harvestingCropId === crop.id}
         />
       ))}

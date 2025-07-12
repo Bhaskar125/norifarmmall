@@ -6,16 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CropGrid } from "@/components/crops/crop-grid"
 import { HarvestToCartWidget } from "@/components/shopping/harvest-to-cart-widget"
+import { EditCropModal } from "@/components/crops/edit-crop-modal"
 import { useCrops } from "@/hooks/useCrops"
 import type { Crop } from "@/types"
 import { Sprout, Trophy, Clock, Plus } from "lucide-react"
 import Link from "next/link"
 
 export default function CropsPage() {
-  const { crops, loading, harvestCrop, readyCrops, growingCrops } = useCrops()
+  const { crops, loading, harvestCrop, editCrop, deleteCrop, readyCrops, growingCrops } = useCrops()
   const [harvestingCropId, setHarvestingCropId] = useState<string | undefined>(undefined)
   const [harvestedCrop, setHarvestedCrop] = useState<Crop | null>(null)
   const [showHarvestWidget, setShowHarvestWidget] = useState(false)
+  const [editingCrop, setEditingCrop] = useState<Crop | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
   const handleHarvest = async (cropId: string) => {
     setHarvestingCropId(cropId)
@@ -35,6 +38,48 @@ export default function CropsPage() {
 
   const handleViewDetails = (cropId: string) => {
     window.location.href = `/crops/${cropId}`
+  }
+
+  const handleEdit = (crop: Crop) => {
+    setEditingCrop(crop)
+    setShowEditModal(true)
+  }
+
+  const handleEditSave = async (cropData: {
+    id: string
+    name: string
+    type: "vegetable" | "fruit" | "grain" | "herb"
+    description: string
+    expectedYield: number
+    rarity: "common" | "rare" | "epic" | "legendary"
+    imageUrl: string
+    growthDuration: number
+    plantedAt: Date
+    harvestAt: Date
+    nftTokenId?: string
+  }) => {
+    try {
+      await editCrop(cropData)
+      setShowEditModal(false)
+      setEditingCrop(null)
+    } catch (error) {
+      console.error("Edit failed:", error)
+      throw error
+    }
+  }
+
+  const handleDelete = async (cropId: string) => {
+    const crop = crops.find(c => c.id === cropId)
+    if (!crop) return
+    
+    if (confirm(`Are you sure you want to delete "${crop.name}"? This action cannot be undone.`)) {
+      try {
+        await deleteCrop(cropId)
+      } catch (error) {
+        console.error("Delete failed:", error)
+        alert("Failed to delete crop. Please try again.")
+      }
+    }
   }
 
   return (
@@ -114,6 +159,8 @@ export default function CropsPage() {
             loading={loading}
             onHarvest={handleHarvest}
             onViewDetails={handleViewDetails}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
             harvestingCropId={harvestingCropId}
           />
         </TabsContent>
@@ -124,6 +171,8 @@ export default function CropsPage() {
               crops={readyCrops}
               onHarvest={handleHarvest}
               onViewDetails={handleViewDetails}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
               harvestingCropId={harvestingCropId}
             />
           ) : (
@@ -142,7 +191,12 @@ export default function CropsPage() {
 
         <TabsContent value="growing" className="space-y-6">
           {growingCrops.length > 0 ? (
-            <CropGrid crops={growingCrops} onViewDetails={handleViewDetails} />
+            <CropGrid 
+              crops={growingCrops} 
+              onViewDetails={handleViewDetails}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           ) : (
             <Card>
               <CardContent className="text-center py-12">
@@ -167,6 +221,20 @@ export default function CropsPage() {
             setShowHarvestWidget(false)
             setHarvestedCrop(null)
           }}
+        />
+      )}
+
+      {/* Edit Crop Modal */}
+      {editingCrop && (
+        <EditCropModal
+          crop={editingCrop}
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false)
+            setEditingCrop(null)
+          }}
+          onSave={handleEditSave}
+          onDelete={handleDelete}
         />
       )}
     </div>

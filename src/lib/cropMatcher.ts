@@ -1,8 +1,6 @@
 import { mockCrops, mockProducts } from './mockData'
 import type { Crop } from '@/types'
 
-const CROPS_STORAGE_KEY = 'nori-farm-crops'
-
 interface MatchedProduct {
   title: string
   price: string
@@ -28,33 +26,39 @@ interface CropMatchResponse {
   allMatches: number
 }
 
-// Get all crops from localStorage and mockData
-function getAllCrops(): Crop[] {
+// Get all crops from JSON file API and mockData
+async function getAllCrops(): Promise<Crop[]> {
   try {
-    const storedCrops = localStorage.getItem(CROPS_STORAGE_KEY)
-    if (storedCrops) {
-      const parsedCrops = JSON.parse(storedCrops) as Array<Omit<Crop, 'plantedAt' | 'harvestAt'> & { plantedAt: string; harvestAt: string }>
-      return parsedCrops.map((crop) => ({
+    // Fetch user crops from API
+    const response = await fetch('/api/user-crops')
+    let userCrops: Crop[] = []
+    
+    if (response.ok) {
+      const fetchedCrops = await response.json()
+      // Convert date strings back to Date objects
+      userCrops = fetchedCrops.map((crop: Omit<Crop, 'plantedAt' | 'harvestAt'> & { plantedAt: string; harvestAt: string }) => ({
         ...crop,
         plantedAt: new Date(crop.plantedAt),
         harvestAt: new Date(crop.harvestAt),
       }))
     }
-    return mockCrops
+    
+    // Combine mock crops with user crops
+    return [...mockCrops, ...userCrops]
   } catch (error) {
-    console.error('Error reading crops from localStorage:', error)
+    console.error('Error fetching crops from API:', error)
     return mockCrops
   }
 }
 
-export function matchCropToProduct(query: string): CropMatchResponse | null {
+export async function matchCropToProduct(query: string): Promise<CropMatchResponse | null> {
   try {
     if (!query) {
       throw new Error('Query parameter is required')
     }
 
     // Get all crops including newly planted ones
-    const allCrops = getAllCrops()
+    const allCrops = await getAllCrops()
 
     // Find crop by name or NFT ID
     const crop = allCrops.find(c => 

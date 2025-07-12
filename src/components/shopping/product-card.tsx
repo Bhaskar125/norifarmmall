@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star, ShoppingCart, ExternalLink } from "lucide-react"
 import { formatCurrency } from "@/lib/utils"
-import Image from "next/image"
 
 interface ProductCardProps {
   product: Product
@@ -21,7 +20,7 @@ export function ProductCard({ product, onAddToCart, isAddingToCart }: ProductCar
     <Card className="overflow-hidden transition-all hover:shadow-lg">
       <CardHeader className="pb-2">
         <div className="relative aspect-square rounded-lg overflow-hidden bg-muted">
-          <Image src={product.imageUrl || "/placeholder.svg"} alt={product.name} fill className="object-cover" />
+          <img src={product.imageUrl || "/placeholder.svg"} alt={product.name} className="w-full h-full object-cover" />
           {hasDiscount && (
             <div className="absolute top-2 left-2">
               <Badge className="bg-red-500 hover:bg-red-600">

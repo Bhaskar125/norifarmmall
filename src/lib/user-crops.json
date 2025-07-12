@@ -1,0 +1,16 @@
+[
+  {
+    "id": "crop_1752329966830",
+    "name": "Pineapple",
+    "type": "fruit",
+    "description": "https://unsplash.com/photos/a-pineapple-hanging-on-a-white-wall-GIAYOvIEGzw",
+    "expectedYield": 5,
+    "rarity": "legendary",
+    "imageUrl": "https://pixabay.com/photos/pineapple-fruit-food-3808963/",
+    "plantedAt": "2025-07-12T14:19:26.830Z",
+    "harvestAt": "2026-07-12T14:19:26.830Z",
+    "maturityLevel": 0,
+    "isReady": false,
+    "nftTokenId": "NFT395"
+  }
+]

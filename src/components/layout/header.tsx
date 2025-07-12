@@ -16,6 +16,7 @@ import {
 import { Sprout, ShoppingCart, User, Settings, LogOut, Bell } from "lucide-react"
 import { useShoppingCart } from "@/hooks/useShoppingCart"
 import { mockUser } from "@/lib/mockData"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 export function Header() {
   const { totalItems } = useShoppingCart()
@@ -52,6 +53,8 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-4">
+          <ThemeToggle />
+          
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="w-5 h-5" />
             {notifications > 0 && (
